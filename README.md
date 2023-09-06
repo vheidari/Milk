@@ -1,2 +1,2 @@
 # Milk
-Milk PHP Version Mananger
+Milk is a PHP Version Mananger ...
