@@ -1,7 +1,5 @@
 # Milk
 Milk is a PHP Version Manager ...
-# Milk
-Milk is a PHP Version Manager ...
 
 ## Project Status / Updates :
 Corrently under Development 
