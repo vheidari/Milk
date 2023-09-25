@@ -1,0 +1,12 @@
+{
+    "CurrentEngine" : {
+        "Php" : [{"Version": ""}, {"Path" : ""}, {"Fpm" : ""}]
+    },
+    "BuildingToolsRequirement": {
+        "Gpp": [{"version": ""}, {"location": ""}],
+        "Gcc": [{"version": ""}, {"location": ""}],
+        "Make": [{"version": ""}, {"location": ""}],
+        "Cmake": [{"version": ""}, {"location": ""}],
+        "isAllBuildToolsInstall" : false
+    }
+}

@@ -11,7 +11,7 @@
 appName="🥛 Milk"
 appVersion="0.1.0"
 
-# [Output stream variables ]
+# [Output stream variables]
 bold=$(tput bold)
 normal=$(tput sgr0)
 # [Text color]
@@ -240,6 +240,22 @@ displayBuildToolsInfo () {
 	local getMakeVersion=$(make --version | grep -iE '[[:digit:]].[[:digit:]].[[:digit:]]' | head -1 | awk '{print $3}')
 	local getCmakeVersion=$(cmake --version | head -1 | awk '{print $3}')
 	
+	local updateMilkConfig=$(cat ./MilkConfig.json | jq ".BuildingToolsRequirement.Gpp[0].version =\"${getGppVersion}\"")
+	updateMilkConfig=$(echo $updateMilkConfig | jq ".BuildingToolsRequirement.Gpp[1].location =\"${getGpp}\"")
+	updateMilkConfig=$(echo $updateMilkConfig | jq ".BuildingToolsRequirement.Gcc[0].version =\"${getGccVersion}\"")
+	updateMilkConfig=$(echo $updateMilkConfig | jq ".BuildingToolsRequirement.Gcc[1].location =\"${getGcc}\"")
+	updateMilkConfig=$(echo $updateMilkConfig | jq ".BuildingToolsRequirement.Make[0].version =\"${getMakeVersion}\"")
+	updateMilkConfig=$(echo $updateMilkConfig | jq ".BuildingToolsRequirement.Make[1].location =\"${getMake}\"")
+	updateMilkConfig=$(echo $updateMilkConfig | jq ".BuildingToolsRequirement.CMake[0].version =\"${getCmake}\"")
+	updateMilkConfig=$(echo $updateMilkConfig | jq ".BuildingToolsRequirement.CMake[1].location =\"${getCmakeVersion}\"")
+	
+	
+	if [[  ${getGpp} != "" && ${getGppVersion} != "" && ${getGcc} != "" && ${getGccVersion} != "" && ${getMake} != "" &&  ${getMakeVersion} != "" &&  ${getCmake} != "" && ${getCmakeVersion} != "" ]]; then
+       updateMilkConfig=$(echo $updateMilkConfig | jq ".BuildingToolsRequirement.isAllBuildToolsInstall =true")
+	fi
+	
+	echo $updateMilkConfig > ./MilkConfig.json
+	
 	
 	echo -e "${bold}${greeColor}1). G++   :${endColor}${normal}"
 	echo -e "       -- g++ version     -> $getGppVersion"
@@ -322,6 +338,7 @@ checkingRequirements () {
     # [checking for system tools.]
     isWgetInstalled=$(dpkg-query -s wget 2>/dev/null | grep -iE installed | head -1)
     isCurlInstalled=$(dpkg-query -s curl 2>/dev/null | grep -iE installed | head -1)
+    isCatInstalled=$(dpkg-query -s coreutils 2>/dev/null | grep -iE installed | head -1)
     isTarInstalled=$(dpkg-query -s tar 2>/dev/null | grep -iE installed | head -1)
     isGzipInstalled=$(dpkg-query -s gzip 2>/dev/null | grep -iE installed | head -1)
     isSedInstalled=$(dpkg-query -s sed 2>/dev/null | grep -iE installed | head -1)
@@ -342,6 +359,13 @@ checkingRequirements () {
          echo -e "${bold}🍼️ [curl]${normal}  -> ${greeColor}package was install${endColor}"
     else 
         installIt curl
+    fi
+    
+    # [install cat] 
+    if [[ ${isCatInstalled} ]]; then
+         echo -e "${bold}🍼️ [cat]${normal}   -> ${greeColor}package was install${endColor}"
+    else 
+        installIt coreutils
     fi
     
     # [install tar]
@@ -449,6 +473,17 @@ handelingInputCommand () {
 }
 
 
+# [Managing phpfpm service start/stop/restart/status]
+managePHPFpmEngineService () {
+     echo ""
+}
+
+
+
+
+
+
+
 # [Get all user input arguments]
 getInputsArgs=$@
 
@@ -473,7 +508,7 @@ setUserPassword
 handelingInputCommand $getInputsArgs
 checkingRequirements
 
-
+displayBuildToolsInfo
 getPhpVersion
 
 # checkBuildToolsVersion
