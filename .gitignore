@@ -1,5 +1,5 @@
 # Milk gitignore file
-/test
+/testlab
 /versions/php/php*
 /packages/php*
 Resource.txt
