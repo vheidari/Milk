@@ -65,47 +65,40 @@ printEndLine () {
 	echo "==========================================================================================="
 }
 
+
+# [Get user system pa$$word]
 setUserPassword () {
-    echo -e "${redColor}‼️  Note: To Installing${endColor} ${appName} ${redColor}requirement tools and compiling source code${endColor} ${appName} ${redColor}needed your password.${endColor}"
-    echo "${bold}Please input your password :${normal}"
-    read getUserPassword
+    echo -e "${redColor}‼️  Note 1: To Installing${endColor}${bold} ${appName} ${normal}${redColor} and its requirement tools ${endColor}${bold} ${appName} ${normal}${redColor}need your system password.${endColor}"
+    echo -e "${redColor}‼️  Note 2: If you have any question about Pa\$\$word please check ${bold}FAQ Questions${normal} ${redColor}in the README.md file. ${endColor}"
+    echo "${bold}🛡️  Please input your pa\$\$word :${normal}"
     
+    # [-s stand for a secure read input]
+    read -s getUserPassword
+    
+    # [checking password is correct or not]
     if echo "$getUserPassword" | sudo -S true 2>/dev/null; then
         clear
-        echo -e "${bold}${greeColor}👌️ Awesome thank You, your password is correct and let's go ...${endColor}${normal}"
+        echo -e "${bold}${greeColor}👌️ Awesome thank You, your pa\$\$word is correct and let's go ...${endColor}${normal}"
         echo ""
     else 
         clear
         echo -e ${bgRedColor}
-        echo "‼️ :(, Your Password is incorrect. let's try again !"
+        echo "‼️ :(, Your Pa\$\$word is incorrect. let's try It again !"
         echo -e ${bgEndColor}
         echo ""
         setUserPassword
     fi
 }
 
-
+# [Downloading the latest version of PHP]
 downloadLastVersion () {
-
-	# [Check wget is exist if not install it] 
-	local isWgetExist=$(which wget)
-	if [ ! -f "$isWgetExist" ]; then
-		printStartLine
-		echo "	 				Start to install latest version of the wget"
-		printStartLine
-
-		echo ""
-		echo " ⌛️ Please wait..."
-		echo " ‼️  Note: ${appName} use wget to manage package on your machine. be pation to install it"
-		sudo apt-get install wget 
-		echo " 🔥️ Done :). wget install successfuly"
-	fi
-    
+    # [create package path]
     local packagePath="$packagesDir/$packageName"
-	#  [ Check local package is exist if not download it. if yep extract it]
+    
+	# [check local package is exist if not download it. if yep extract it]
 	if [ ! -f "${packagePath}" ]; then
 		printStartLine
-		echo "	 Start to downloading latest version of PHP : ${packageName} from ${baseUrl}"
+		echo "Start to downloading latest version of PHP : ${packageName} from ${baseUrl}"
 		printStartLine
 
 		echo ""
@@ -117,7 +110,7 @@ downloadLastVersion () {
 		
 	
 		printStartLine
-		echo "				Start extracting ${packageName}"
+		echo "Start extracting ${packageName}"
 		printStartLine
 
 		tar -xf $packageName -C $phpInstallDir > /dev/null
@@ -138,10 +131,11 @@ downloadLastVersion () {
 	fi
 }
 
+# [Configure Common PHP package before compulation]
 startConfigureCommonPackage () {
 
 	printStartLine
-	echo "				 start configure $packageNameAndVersion"
+	echo "start configure $packageNameAndVersion"
 	printStartLine
 
 	echo ""
@@ -199,10 +193,10 @@ startConfigureCommonPackage () {
 	printEndLine
 }
 
-
+# [Start Building PHP Engine by Make]
 startBuildProject () {
 	printStartLine
-	echo "				 Start Build $packageNameAndVersion"
+	echo "Start Build $packageNameAndVersion"
 	printStartLine
 
 
@@ -214,7 +208,7 @@ startBuildProject () {
 }
 
 
-#todo
+# [Get Current PHP installed on the system]
 getPhpVersion () {
 	identifyPHP=$( which php )
 	if [ -f "$identifyPHP" ]; then
@@ -228,9 +222,19 @@ getPhpVersion () {
 	echo $identifyPHP
 }
 
-# [Display building tools chain ]
+# # [Display BuildingToolsChain]
 displayBuildToolsInfo () {
-	# for this part we should use dpkg-query
+    
+    # [force update/recheck for BuildingToolsChain on system ]
+    inputArg=$1
+   
+    # [checking for first time run]
+    firstRunCheck=$(cat ./MilkConfig.json | jq ".BuildingToolsRequirement.isAllBuildToolsInstall")
+   
+   
+   if [[ ${inputArg} == "--updateIt" || ${firstRunCheck} == "false" ]]; then
+    
+	# [get BuildingTool information]
 	local getGpp=$(which g++)
 	local getGcc=$(which gcc) 
 	local getMake=$(which make)
@@ -240,6 +244,7 @@ displayBuildToolsInfo () {
 	local getMakeVersion=$(make --version | grep -iE '[[:digit:]].[[:digit:]].[[:digit:]]' | head -1 | awk '{print $3}')
 	local getCmakeVersion=$(cmake --version | head -1 | awk '{print $3}')
 	
+    # [updating MilkConfig.json with BuildingTools info ]
 	local updateMilkConfig=$(cat ./MilkConfig.json | jq ".BuildingToolsRequirement.Gpp[0].version =\"${getGppVersion}\"")
 	updateMilkConfig=$(echo $updateMilkConfig | jq ".BuildingToolsRequirement.Gpp[1].location =\"${getGpp}\"")
 	updateMilkConfig=$(echo $updateMilkConfig | jq ".BuildingToolsRequirement.Gcc[0].version =\"${getGccVersion}\"")
@@ -249,13 +254,13 @@ displayBuildToolsInfo () {
 	updateMilkConfig=$(echo $updateMilkConfig | jq ".BuildingToolsRequirement.CMake[0].version =\"${getCmake}\"")
 	updateMilkConfig=$(echo $updateMilkConfig | jq ".BuildingToolsRequirement.CMake[1].location =\"${getCmakeVersion}\"")
 	
-	
+	# [checking mark isAllBuildToolsInstall to true. if all build requirement were install]
 	if [[  ${getGpp} != "" && ${getGppVersion} != "" && ${getGcc} != "" && ${getGccVersion} != "" && ${getMake} != "" &&  ${getMakeVersion} != "" &&  ${getCmake} != "" && ${getCmakeVersion} != "" ]]; then
        updateMilkConfig=$(echo $updateMilkConfig | jq ".BuildingToolsRequirement.isAllBuildToolsInstall =true")
 	fi
 	
+    # [update MilkConfig.json with new BuildingToolsChain info]
 	echo $updateMilkConfig > ./MilkConfig.json
-	
 	
 	echo -e "${bold}${greeColor}1). G++   :${endColor}${normal}"
 	echo -e "       -- g++ version     -> $getGppVersion"
@@ -269,26 +274,28 @@ displayBuildToolsInfo () {
 	echo -e "${bold}${greeColor}4). Cmake :${endColor}${normal}"
 	echo -e "       -- cmake version   -> $getCmakeVersion"
     echo -e "       -- cmake location  -> ${cyanColor}$getCmake ${endColor}"
+    
+    fi
 
 }
 
 
 
-#todo
+# [Todo: getting avaibles Composer list]
 queryForComoserVersion() {
 	curl https://getcomposer.org/download/ | grep 'composer.phar' | sed 's/<a href="\///g' | grep "download/" | sed 's/"//g' | sed 's/download\//📦<fe0f> https:\/\/getcomposer.org\/download\//g' | sed 's/ //g' | sed 's/(//g' > phpComposerList.txt
 }
 
-#todo
+# [Todo: getting aviables PHP list]
 queryListOfPackage () {
 	curl https://www.php.net/releases/ | grep tar.xz | sed 's/<a href="/https:\/\/www.php.net/g' | sed 's/">.*//g' | sed 's/<li>//g' | sed 's/https:\/\//📦️ https:\/\//g'
 }
 
 
-# [Display available packages]
+# [Display all package that downloaded on the disk]
 listOfLocalPackage () {
 	printStartLine
-	echo "			📦 ${bold} List of local packages ${normal} :											 "
+	echo "📦 ${bold} List of local packages ${normal} :"
 	printStartLine
 
 	packages=$(ls $packagesDir | grep .tar.xz)
@@ -297,14 +304,14 @@ listOfLocalPackage () {
 
 
 
-#todo
+# [Display PHP-FPM UserName/GroupName]
 fpmUserNameAndGroupName () {
 	echo 🙋 "PHP-FPM Username  : " ${fpmUserName}
 	echo 🙋 "PHP-FPM Groupname : " ${fpmGroupName}
 }
 
 
-# [Looking for .bashrc and .zshrc file]
+# [Todo: Looking for .bashrc and .zshrc file]
 lookingForZshOrBashConfigFile () {
     local bashrc=$($HOME/.bashrc);
     local zshrc=$($HOME/.zshrc);
@@ -320,7 +327,7 @@ lookingForZshOrBashConfigFile () {
 }
 
 
-# [Installing requirement packages through apt on the machine]
+# [Installing requirement Tools through apt on the machine]
 installIt () {
     tool=$1
     echo ""
@@ -333,9 +340,13 @@ installIt () {
 
 
 
-# [ Checking requirement tools for Milk]
+# [Checking/Installing requirement tools for Milk]
 checkingRequirements () {
-    # [checking for system tools.]
+    
+    # [get input argument]
+    inputArg=$1
+
+    # [checking for system tools]
     isWgetInstalled=$(dpkg-query -s wget 2>/dev/null | grep -iE installed | head -1)
     isCurlInstalled=$(dpkg-query -s curl 2>/dev/null | grep -iE installed | head -1)
     isCatInstalled=$(dpkg-query -s coreutils 2>/dev/null | grep -iE installed | head -1)
@@ -347,29 +358,48 @@ checkingRequirements () {
     isJqInstalled=$(dpkg-query -s jq 2>/dev/null | grep -iE installed | head -1)
     isTrInstalled=$(dpkg-query -s coreutils 2>/dev/null | grep -iE installed | head -1)
     
+    
+    local updateMilkConfig=$(cat ./MilkConfig.json)
+    
     # [install wget]
     if [[ ${isWgetInstalled} ]]; then
-        echo -e "${bold}🍼️ [wget]${normal}  ->  ${greeColor}package was install${endColor}"
+        local wgetVersion=$(wget --version | head -1 |  grep -o -iE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')
+        local wgetLocation=$(which wget)
+        updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkRequirementTools.wget[0].version=\"${wgetVersion}\"")
+        updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkRequirementTools.wget[1].location=\"${wgetLocation}\"")
+        echo -e "${bold}🍼️ [wget]${normal}  -> ${greeColor}package was install${endColor}"
     else 
         installIt wget
     fi
     
     # [install curl] 
     if [[ ${isCurlInstalled} ]]; then
-         echo -e "${bold}🍼️ [curl]${normal}  -> ${greeColor}package was install${endColor}"
+        local curlVersion=$(curl --version | head -1 | awk '{print $2}')
+        local curlLocation=$(which curl)
+        updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkRequirementTools.curl[0].version=\"${curlVersion}\"")
+        updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkRequirementTools.curl[1].location=\"${curlLocation}\"")
+        echo -e "${bold}🍼️ [curl]${normal}  -> ${greeColor}package was install${endColor}"
     else 
         installIt curl
     fi
     
     # [install cat] 
     if [[ ${isCatInstalled} ]]; then
-         echo -e "${bold}🍼️ [cat]${normal}   -> ${greeColor}package was install${endColor}"
+        local catVersion=$(cat --version | head -1 | awk '{print $4}')
+        local catLocation=$(which cat)
+        updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkRequirementTools.cat[0].version=\"${catVersion}\"")
+        updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkRequirementTools.cat[1].location=\"${catLocation}\"")
+        echo -e "${bold}🍼️ [cat]${normal}   -> ${greeColor}package was install${endColor}"
     else 
         installIt coreutils
     fi
     
     # [install tar]
     if [[ ${isTarInstalled} ]]; then
+        local tarVersion=$(tar --version | head -1 | awk '{print $4}')
+        local tarLocation=$(which tar)
+        updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkRequirementTools.tar[0].version=\"${tarVersion}\"")
+        updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkRequirementTools.tar[1].location=\"${tarLocation}\"")
         echo -e "${bold}🍼️ [tar]${normal}   -> ${greeColor}package was install${endColor}"
     else 
         installIt tar
@@ -377,6 +407,10 @@ checkingRequirements () {
     
     # [install gzip]
     if [[ ${isGzipInstalled} ]]; then
+        local gzipVersion=$(gzip --version | head -1 | awk '{print $2}')
+        local gzipLocation=$(which gzip)
+        updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkRequirementTools.gzip[0].version=\"${gzipVersion}\"")
+        updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkRequirementTools.gzip[1].location=\"${gzipLocation}\"")
         echo -e "${bold}🍼️ [gzip]${normal}  -> ${greeColor}package was install${endColor}"
     else 
         installIt gzip
@@ -384,6 +418,10 @@ checkingRequirements () {
     
     # [install sed]
     if [[ ${isSedInstalled} ]]; then
+        local sedVersion=$(sed --version | head -1 | awk '{print $4}')
+        local sedLocation=$(which sed)
+        updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkRequirementTools.sed[0].version=\"${sedVersion}\"")
+        updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkRequirementTools.sed[1].location=\"${sedLocation}\"")
         echo -e "${bold}🍼️ [sed]${normal}   -> ${greeColor}package was install${endColor}"
     else 
         installIt sed
@@ -391,6 +429,10 @@ checkingRequirements () {
     
     # [install awk]
     if [[ ${isAwkInstalled} ]]; then
+        local awkVersion=$(awk --version | head -1 | awk '{print $3}' | sed 's/,//g')
+        local awkLocation=$(which awk)
+        updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkRequirementTools.gawk[0].version=\"${awkVersion}\"")
+        updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkRequirementTools.gawk[1].location=\"${awkLocation}\"")
         echo -e "${bold}🍼️ [awk]${normal}   -> ${greeColor}package was install${endColor}"
     else 
         installIt gawk
@@ -398,6 +440,10 @@ checkingRequirements () {
     
     # [install grep]
     if [[ ${isGrepInstalled} ]]; then
+        local grepVersion=$(grep --version | head -1 | awk '{print $4}')
+        local grepLocation=$(which grep)
+        updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkRequirementTools.grep[0].version=\"${grepVersion}\"")
+        updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkRequirementTools.grep[1].location=\"${grepLocation}\"")
          echo -e "${bold}🍼️ [grep]${normal}  -> ${greeColor}package was install${endColor}"
     else 
         installIt grep
@@ -405,6 +451,10 @@ checkingRequirements () {
     
     # [install jq]
     if [[ ${isJqInstalled} ]]; then
+        local jqVersion=$(jq --version | tr "-" " " | awk '{print $2}')
+        local jqLocation=$(which jq)
+        updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkRequirementTools.jq[0].version=\"${jqVersion}\"")
+        updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkRequirementTools.jq[1].location=\"${jqLocation}\"")
         echo -e "${bold}🍼️ [jq]${normal}    -> ${greeColor}package was install${endColor}"
     else 
         installIt jq
@@ -412,13 +462,26 @@ checkingRequirements () {
     
     # [install tr]
     if [[ ${isTrInstalled} ]]; then
+        local trVersion=$(tr --version | head -1 | awk '{print $4}')
+        local trLocation=$(which tr)
+        updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkRequirementTools.tr[0].version=\"${trVersion}\"")
+        updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkRequirementTools.tr[1].location=\"${trLocation}\"")
         echo -e "${bold}🍼️ [tr]${normal}    -> ${greeColor}package was install${endColor}"
     else 
         installIt coreutils
     fi
     
+    # [updating MilkConfig.json with new information ]
+    echo $updateMilkConfig > ./MilkConfig.json
     
 }
+
+# [Forcing update MilkConfig.json ]
+forceUpdateMilkConfig () {
+    checkingRequirements
+    displayBuildToolsInfo
+}
+
 
 # [Checking building requirement]
 checkBuildingRequirement () {
@@ -433,8 +496,7 @@ checkBuildingRequirement () {
     
 }
 
-
-# []
+# [Get Current Php version that set on system ]
 setProperPHPVersion () {
     echo ""
 }
@@ -442,7 +504,8 @@ setProperPHPVersion () {
 
 # [Show all Options/Switches that use could use as input argument]
 help () {
-    echo "you call help function"
+    echo "${bold}🤓️ Help :${normal}"
+    echo "this is help functions"
 }
 
 # [Handeling input Options/Switches]
@@ -478,8 +541,10 @@ managePHPFpmEngineService () {
      echo ""
 }
 
-
-
+# [Todo : Running/Configuring Milk through browsers - dep:netcat http server]
+managerTroughtUI () {
+    echo ""
+}
 
 
 
@@ -489,14 +554,14 @@ getInputsArgs=$@
 
 # printStartLine
 echo "${bold}Welcome to ${appName}. Version (${appVersion}) ${normal}"
-# printStartLine
+printStartLine
 
 
 
 #=========================[ Milk RunTime ]============================
 
 
-setUserPassword
+# setUserPassword
 
 # [First Stage / checkingRequirements ]
 # checkingRequirements
@@ -506,10 +571,14 @@ setUserPassword
 
 
 handelingInputCommand $getInputsArgs
-checkingRequirements
+# forceUpdateMilkConfig
+listOfLocalPackage
 
-displayBuildToolsInfo
-getPhpVersion
+
+# checkingRequirements
+# 
+# displayBuildToolsInfo
+# getPhpVersion
 
 # checkBuildToolsVersion
 

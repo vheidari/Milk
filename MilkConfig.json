@@ -1,12 +1,40 @@
 {
     "CurrentEngine" : {
-        "Php" : [{"Version": ""}, {"Path" : ""}, {"Fpm" : ""}]
+        "Php" : [{"Version": ""}, {"Path" : ""}, {"Fpm" : ""}, {"FpmConfig" : ""}]
+    },
+    "LocalPackages" : {
+        "key" : "value"
     },
     "BuildingToolsRequirement": {
         "Gpp": [{"version": ""}, {"location": ""}],
         "Gcc": [{"version": ""}, {"location": ""}],
         "Make": [{"version": ""}, {"location": ""}],
-        "Cmake": [{"version": ""}, {"location": ""}],
+        "CMake": [{"version": ""}, {"location": ""}],
         "isAllBuildToolsInstall" : false
+    },
+    "BuildConfiguration": {
+        "CommandPackages": ["cli", "fpm", ""]
+    },
+    "MilkRequirementTools": {
+        "wget": [{"version": ""}, {"location": ""}],
+        "curl": [{"version": ""}, {"location": ""}],
+        "cat": [{"version": ""}, {"location": ""}],
+        "tar": [{"version": ""}, {"location": ""}],
+        "gzip": [{"version": ""}, {"location": ""}],
+        "sed": [{"version": ""}, {"location": ""}],
+        "gawk": [{"version": ""}, {"location": ""}],
+        "grep": [{"version": ""}, {"location": ""}],
+        "jq": [{"version": ""}, {"location": ""}],
+        "tr": [{"version": ""}, {"location": ""}],
+        "isAllBuildToolsInstall" : false
+    },
+    "CountRun" : {
+        "IsItFirstRun" : true,
+        "Counter" : 0
+    },
+    "proxyInfo" : {
+        "http" : "ip:port",
+        "https" : "ip:port"
     }
+    
 }
