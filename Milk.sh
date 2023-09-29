@@ -34,9 +34,10 @@ bgEndColor="\033[0m"
 
 # [PHP Packages Variables]
 baseUrl="https://www.php.net"
-baseDownloadUrl="https://www.php.net/distributions/"
+baseDownloadUrl="https://www.php.net/distributions"
 fileExt="tar.xz"
-lastVersion="https://www.php.net/distributions/php-7.4.27.tar.xz"
+# ["https://www.php.net/distributions/php-7.4.27.tar.xz"]
+lastVersion=
 currentDir=$(pwd)
 packagesDir="$currentDir/packages"
 phpInstallDir="$currentDir/versions/php"
@@ -92,17 +93,19 @@ setUserPassword () {
 }
 
 
-# [Return default PHP version]
+# [Todo: Return default PHP version]
 getDefaultPHPVersion () {
     echo ""
 }
 
 
-# []
+# [Todo : this function should get a PHP name/version as input argument and create a download url]
 createDownloadUrl () {
     local getInputsArgs=$1
+    local downloadUrl=
     if [[  $getInputsArgs != "" ]]; then
-        echo ""
+        downloadUrl=$("${baseDownloadUrl}\/${getInputsArgs}")
+        echo $downloadUrl
     fi
     
 }
