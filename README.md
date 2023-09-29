@@ -7,7 +7,7 @@ On this repo we have 2 repo as you can check it :
 1. master
 2. dev_zone
 
-Each day I try update `Milk` and I want you know its not ready to use for now. we just push some feature each day to it to make it ready to use. I saw a copules of guys who that `clone` it. and that was so cool for me. please  be patient to ready it.
+Every day, I'm working on updating `Milk`, but I want you to know that it's not ready to use just yet. We're continuously adding new features to make it fully functional. I recently came across a couple of guys who `cloned` it, and I found that really cool that they are interested to `Milk`. I appreciate your patience as we work to get it ready for use.
 
 ## Project Status / Updates :
 Currently under Development 
