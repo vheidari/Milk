@@ -1,0 +1,5 @@
+# Milk gitignore file
+/testlab
+/versions/php/php*
+/packages/php*
+
