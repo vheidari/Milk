@@ -34,7 +34,8 @@ bgEndColor="\033[0m"
 
 # [PHP Packages Variables]
 baseUrl="https://www.php.net"
-#lastVersion="https://www.php.net/distributions/php-8.2.9.tar.xz"
+baseDownloadUrl="https://www.php.net/distributions/"
+fileExt="tar.xz"
 lastVersion="https://www.php.net/distributions/php-7.4.27.tar.xz"
 currentDir=$(pwd)
 packagesDir="$currentDir/packages"
@@ -89,6 +90,24 @@ setUserPassword () {
         setUserPassword
     fi
 }
+
+
+# [Return default PHP version]
+getDefaultPHPVersion () {
+    echo ""
+}
+
+
+# []
+createDownloadUrl () {
+    local getInputsArgs=$1
+    if [[  $getInputsArgs != "" ]]; then
+        echo ""
+    fi
+    
+}
+
+
 
 # [Downloading the latest version of PHP]
 downloadLastVersion () {
@@ -222,7 +241,7 @@ getPhpVersion () {
 	echo $identifyPHP
 }
 
-# # [Display BuildingToolsChain]
+# [Display BuildingToolsChain]
 displayBuildToolsInfo () {
     
     # [force update/recheck for BuildingToolsChain on system ]
@@ -286,10 +305,42 @@ queryForComoserVersion() {
 	curl https://getcomposer.org/download/ | grep 'composer.phar' | sed 's/<a href="\///g' | grep "download/" | sed 's/"//g' | sed 's/download\//📦<fe0f> https:\/\/getcomposer.org\/download\//g' | sed 's/ //g' | sed 's/(//g' > phpComposerList.txt
 }
 
-# [Todo: getting aviables PHP list]
-queryListOfPackage () {
-	curl https://www.php.net/releases/ | grep tar.xz | sed 's/<a href="/https:\/\/www.php.net/g' | sed 's/">.*//g' | sed 's/<li>//g' | sed 's/https:\/\//📦️ https:\/\//g'
+# [Getting and Display available PHP Engine list]
+queryForPHPPackages () {
+    
+    # [get input argument]
+    local getInputsArgs=$1
+    
+    # [checking request is for lattest version ?]
+    if [[ ${getInputsArgs} == "--get-last-version" ]]; then
+        local getLastVersion=$(curl -s https://www.php.net/releases/ | grep tar.xz | sed 's/<a href="/https:\/\/www.php.net/g' | sed 's/">.*//g' | sed 's/<li>//g' | sed 's/https:\/\//📦️ https:\/\//g' | sed 's/http:\/\/museum.php.net\/*//g' | sed 's/https:\/\/www.php.netphp5\/php-.*//g' | head -1)
+        echo "$getLastVersion"
+    else 
+        # [ just display all avaibles php packages ]
+        getAllPHPPackages=$(curl -s https://www.php.net/releases/ | grep tar.xz | sed 's/<a href="/https:\/\/www.php.net/g' | sed 's/">.*//g' | sed 's/<li>//g' | sed 's/https:\/\//📦️ https:\/\//g' | sed 's/http:\/\/museum.php.net\/*//g' | sed 's/https:\/\/www.php.netphp5\/php-.*//g')
+        
+        echo "$getAllPHPPackages"
+    fi
+	
+    
 }
+
+
+# [Getting lastes version of php through queryForPHPPackages function ]
+getLatestPHPVersion () {
+    local getInputsArgs=$1
+    local lastPHPVersion=$( queryForPHPPackages "--get-last-version" )
+    
+    # [if is true just show last PHP Version URL]
+    if [[  ${getInputsArgs} == "--display-last-version" ]]; then 
+        echo $lastPHPVersion
+    else 
+        # [update lastVersion variable]
+        lastVersion=$lastPHPVersion
+    fi
+}
+
+
 
 
 # [Display all package that downloaded on the disk]
@@ -536,6 +587,7 @@ handelingInputCommand () {
 }
 
 
+
 # [Managing phpfpm service start/stop/restart/status]
 managePHPFpmEngineService () {
      echo ""
@@ -571,8 +623,10 @@ printStartLine
 
 
 handelingInputCommand $getInputsArgs
+# queryForPHPPackages --get-last-version
+getLatestPHPVersion --display-last-version
 # forceUpdateMilkConfig
-listOfLocalPackage
+# listOfLocalPackage
 
 
 # checkingRequirements
