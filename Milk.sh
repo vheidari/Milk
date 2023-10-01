@@ -99,7 +99,7 @@ getDefaultPHPVersion () {
 }
 
 
-# [Todo : this function should get a PHP name/version as input argument and create a download url]
+# [Create a download url through input argument]
 createDownloadUrl () {
     local getInputsArgs=$1
     local patternOne="^php-[0-9]+\.[0-9]+\.[0-9]+\.tar\.xz$"
