@@ -102,12 +102,21 @@ getDefaultPHPVersion () {
 # [Todo : this function should get a PHP name/version as input argument and create a download url]
 createDownloadUrl () {
     local getInputsArgs=$1
+    local patternOne="^php-[0-9]+\.[0-9]+\.[0-9]+\.tar\.xz$"
+    local patternTwo="^php-[0-9]+\.[0-9]+\.[0-9]+$"
     local downloadUrl=
-    if [[  $getInputsArgs != "" ]]; then
-        downloadUrl=$("${baseDownloadUrl}\/${getInputsArgs}")
+        
+    if [[ $getInputsArgs != "" && $getInputsArgs =~ $patternOne ]]; then
+        downloadUrl="${baseDownloadUrl}/${getInputsArgs}"
         echo $downloadUrl
+    elif [[ $getInputsArgs =~ $patternTwo ]]; then
+        downloadUrl="${baseDownloadUrl}/${getInputsArgs}.$fileExt"
+        echo $downloadUrl
+    else
+        echo -e ${bgRedColor}
+             echo "Unfortuanly this \"$getInputsArgs\" package name isn't valid!. please use Milk with [--help] switch. "
+        echo -e ${bgEndColor}
     fi
-    
 }
 
 
@@ -626,8 +635,12 @@ printStartLine
 
 
 handelingInputCommand $getInputsArgs
+# createDownloadUrl "php-7.4.27.tar.xz"
+# createDownloadUrl "php-7.4.7"
+
 # queryForPHPPackages --get-last-version
-getLatestPHPVersion --display-last-version
+# queryForPHPPackages
+# getLatestPHPVersion --display-last-version
 # forceUpdateMilkConfig
 # listOfLocalPackage
 
