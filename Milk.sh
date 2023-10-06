@@ -245,7 +245,7 @@ setDefaultPhpPhpFpmVersion () {
     checkingIsPhpInstalled
     
     # [set php version if its installed on the system]
-    if [[ ${isPhpExist} != "PHP" ]]; then
+    if [[ ${isPhpExist} == "PHP" ]]; then
     
         case "$getInputsArgs" in  
             "--phpVersion")
@@ -577,7 +577,8 @@ checkBuildingRequirement () {
     
 }
 
-# [Setup appropriate php version on the path base on user request]
+
+# [Todo: Setup appropriate php version on the path base on user request]
 setPHPOnThePath () {
     echo ""
 }
@@ -585,17 +586,17 @@ setPHPOnThePath () {
 
 # [Is PHP Installed]
 checkingIsPhpInstalled () {
-    isPhpExist=$(ph1p --version 2>/dev/null | head -1 | awk '{print $1}')
+    isPhpExist=$(php --version 2>/dev/null | head -1 | awk '{print $1}')
 }
 
 
-# [Show all Options/Switches that use could use as input argument]
+# [Todo: Show all Options/Switches that use could use as input argument]
 help () {
     echo "${bold}🤓️ Help :${normal}"
     echo "this is help functions"
 }
 
-# [Handeling input Options/Switches]
+# [Todo: Handeling input Options/Switches]
 handelingInputCommand () {
 
     local inputArgs=$@
@@ -663,8 +664,10 @@ handelingInputCommand $getInputsArgs
 checkingIsPhpInstalled
 setDefaultPhpPhpFpmVersion --both
 
+
 # setDefaultPhpPhpFpmVersion
 # 
+# echo $isPhpExist
 # echo $currentPhpVersion
 # echo $currentPhpFpmVersion
 
