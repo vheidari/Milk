@@ -39,6 +39,9 @@ currentPhpVersion=
 currentPhpFpmVersion=
 isPhpExist=
 
+# [Proxy Variables]
+httpProxy=
+httpsProxy=
 
 # [PHP Packages Variables]
 baseUrl="https://www.php.net"
@@ -578,6 +581,32 @@ checkBuildingRequirement () {
 }
 
 
+# [Todo: Set Proxy for curl/wget]
+# [@Callable: Dircet callable function]
+setProxy () {
+    local getInputsArgs=$@
+    local getOption=$(echo $getInputsArgs | awk '{print $1}')
+    
+    if [[ $getOption == "--proxy" ]]; then
+        httpProxy=$(echo $getInputsArgs | awk '{print $2}')
+        httpsProxy=$(echo $getInputsArgs | awk '{print $3}')
+        
+        # [set proxy in config file]
+        if [[ ${httpProxy} != "" && ${httpsProxy} != "" ]]; then
+            local updateMilkConfig=$(cat ./MilkConfig.json | jq ".proxyInfo.http=\"$httpProxy\"")
+            updateMilkConfig=$(echo $updateMilkConfig | jq ".proxyInfo.https=\"$httpsProxy\"")
+            echo $updateMilkConfig > ./MilkConfig.json
+        fi
+        
+    else 
+        echo -e ${bgRedColor}
+        echo "👀️ Error: Wrong input argument you passing : ( ${getOption} ) as input argument. you should use '[--proxy]' as input argument in [setProx] function !!"
+        echo -e ${bgEndColor}
+    fi
+    
+    
+}
+
 # [Todo: Setup appropriate php version on the path base on user request]
 setPHPOnThePath () {
     echo ""
@@ -661,8 +690,12 @@ printStartLine
 
 handelingInputCommand $getInputsArgs
 
-checkingIsPhpInstalled
-setDefaultPhpPhpFpmVersion --both
+setProxy --proxy http://127.0.0.1:2512 https://127.0.0.1:2513
+
+
+# 
+# checkingIsPhpInstalled
+# setDefaultPhpPhpFpmVersion --both
 
 
 # setDefaultPhpPhpFpmVersion
