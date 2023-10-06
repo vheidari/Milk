@@ -7,7 +7,11 @@
 # Versuib : 0.1.0
 # ----------------------------------------------------------------------------------
 
-# [App Variables]
+# Todo : (refactoring sed part) through -e switch we could run multiple replacement replacement -e with multiple pipe 
+#   - link : https://unix.stackexchange.com/questions/268640/make-multiple-edits-with-a-single-call-to-sed
+
+
+# [App variables]
 appName="🥛 Milk"
 appVersion="0.1.0"
 
@@ -29,6 +33,10 @@ bgBlueColor="\033[44m"
 bgYellowColor="\033[43m"
 bgWhiteColor="\033[47m"
 bgEndColor="\033[0m"
+
+# [PHP/PHPFpm Version variables]
+currentPhpVersion=
+currentPhpFpmVersion=
 
 
 
@@ -92,11 +100,6 @@ setUserPassword () {
     fi
 }
 
-
-# [Todo: Return default PHP version]
-getDefaultPHPVersion () {
-    echo ""
-}
 
 
 # [Create a download url through input argument]
@@ -239,19 +242,33 @@ startBuildProject () {
 }
 
 
-# [Get Current PHP installed on the system]
-getPhpVersion () {
-	identifyPHP=$( which php )
-	if [ -f "$identifyPHP" ]; then
-		# php --version | head -1 | awk '{print $2}' 
-		currentPhpVersion=$( /usr/local/bin/php --version | grep -o -w '[0-9].[0-9].[0-9]' | head -1 ) 
-
-	else 
-		echo "couldn't find any php on your machine";
-	fi
-	echo $currentPhpVersion
-	echo $identifyPHP
+# [Set PHP/PHPFpm version variables if them are exist ]
+setDefaultPhpPhpFpmVersion () {
+    getInputsArgs=$1
+    
+    case "$getInputsArgs" in  
+         "--phpVersion")
+            currentPhpVersion=$(php -v 2>/dev/null | head -1 | awk '{print $2}')
+         ;;
+         "--phpFpmVerison")
+            currentPhpFpmVersion=$(php-fpm --version 2>/dev/null | head -1 | awk '{print $2}')
+         ;;
+         
+         "--both")
+            currentPhpVersion=$(php -v 2>/dev/null | head -1 | awk '{print $2}')
+            currentPhpFpmVersion=$(php-fpm --version 2>/dev/null | head -1 | awk '{print $2}')
+         ;;
+         
+    esac
+    
+    if [[ $getInputsArgs != "" && $currentPhpVersion == "" && ${currentPhpFpmVersion} == "" ]]; then
+        echo -e ${bgRedColor}
+        echo "👀️ Error: Milk cannot find any [PHP] and [PHP Fpm] engines on your system. It is possible that they were never installed. or you might use wrong input : ${getInputsArgs} argument !!"
+        echo -e ${bgEndColor}
+    fi
+        
 }
+
 
 # [Display BuildingToolsChain]
 displayBuildToolsInfo () {
@@ -559,8 +576,8 @@ checkBuildingRequirement () {
     
 }
 
-# [Get Current Php version that set on system ]
-setProperPHPVersion () {
+# [Setup appropriate php version on the path base on user request]
+setPHPOnThePath () {
     echo ""
 }
 
@@ -600,7 +617,7 @@ handelingInputCommand () {
 
 
 
-# [Managing phpfpm service start/stop/restart/status]
+# [Todo : Managing phpfpm service start/stop/restart/status]
 managePHPFpmEngineService () {
      echo ""
 }
@@ -635,6 +652,11 @@ printStartLine
 
 
 handelingInputCommand $getInputsArgs
+# setDefaultPhpPhpFpmVersion
+# 
+# echo $currentPhpVersion
+# echo $currentPhpFpmVersion
+
 # createDownloadUrl "php-7.4.27.tar.xz"
 # createDownloadUrl "php-7.4.7"
 
