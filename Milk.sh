@@ -37,7 +37,7 @@ bgEndColor="\033[0m"
 # [PHP/PHPFpm Version variables]
 currentPhpVersion=
 currentPhpFpmVersion=
-
+isPhpExist=
 
 
 # [PHP Packages Variables]
@@ -75,7 +75,6 @@ printEndLine () {
 	echo "==========================================================================================="
 }
 
-
 # [Get user system pa$$word]
 setUserPassword () {
     echo -e "${redColor}‼️  Note 1: To Installing${endColor}${bold} ${appName} ${normal}${redColor} and its requirement tools ${endColor}${bold} ${appName} ${normal}${redColor}need your system password.${endColor}"
@@ -100,8 +99,6 @@ setUserPassword () {
     fi
 }
 
-
-
 # [Create a download url through input argument]
 createDownloadUrl () {
     local getInputsArgs=$1
@@ -121,8 +118,6 @@ createDownloadUrl () {
         echo -e ${bgEndColor}
     fi
 }
-
-
 
 # [Downloading the latest version of PHP]
 downloadLastVersion () {
@@ -241,34 +236,46 @@ startBuildProject () {
 	echo " 🔥️ Done :), $packageNameAndVersion successfully compiled!!!"
 }
 
-
 # [Set PHP/PHPFpm version variables if them are exist ]
 setDefaultPhpPhpFpmVersion () {
+    # [get input arguments]
     getInputsArgs=$1
     
-    case "$getInputsArgs" in  
-         "--phpVersion")
-            currentPhpVersion=$(php -v 2>/dev/null | head -1 | awk '{print $2}')
-         ;;
-         "--phpFpmVerison")
-            currentPhpFpmVersion=$(php-fpm --version 2>/dev/null | head -1 | awk '{print $2}')
-         ;;
-         
-         "--both")
-            currentPhpVersion=$(php -v 2>/dev/null | head -1 | awk '{print $2}')
-            currentPhpFpmVersion=$(php-fpm --version 2>/dev/null | head -1 | awk '{print $2}')
-         ;;
-         
-    esac
+    # [checking php exist on this machine]
+    checkingIsPhpInstalled
     
-    if [[ $getInputsArgs != "" && $currentPhpVersion == "" && ${currentPhpFpmVersion} == "" ]]; then
-        echo -e ${bgRedColor}
-        echo "👀️ Error: Milk cannot find any [PHP] and [PHP Fpm] engines on your system. It is possible that they were never installed. or you might use wrong input : ${getInputsArgs} argument !!"
-        echo -e ${bgEndColor}
+    # [set php version if its installed on the system]
+    if [[ ${isPhpExist} != "PHP" ]]; then
+    
+        case "$getInputsArgs" in  
+            "--phpVersion")
+                currentPhpVersion=$(php -v 2>/dev/null | head -1 | awk '{print $2}')
+            ;;
+            "--phpFpmVerison")
+                currentPhpFpmVersion=$(php-fpm --version 2>/dev/null | head -1 | awk '{print $2}')
+            ;;
+            
+            "--both")
+                currentPhpVersion=$(php -v 2>/dev/null | head -1 | awk '{print $2}')
+                currentPhpFpmVersion=$(php-fpm --version 2>/dev/null | head -1 | awk '{print $2}')
+            ;;
+            
+        esac
+        
+        if [[ $getInputsArgs != "" && ${currentPhpVersion} == "" && ${currentPhpFpmVersion} == "" ]]; then
+            echo -e ${bgRedColor}
+            echo "👀️ Error: Milk cannot find any [PHP] or [PHP Fpm] engines on your system or you might use a wrong input : ${getInputsArgs} argument !!"
+            echo -e ${bgEndColor}
+        fi
+        
+        
+    else 
+            echo -e ${bgRedColor}
+            echo "👀️ Error: Milk cannot find any [PHP] or [PHP Fpm] engines on your system !!"
+            echo -e ${bgEndColor}
     fi
         
 }
-
 
 # [Display BuildingToolsChain]
 displayBuildToolsInfo () {
@@ -327,8 +334,6 @@ displayBuildToolsInfo () {
 
 }
 
-
-
 # [Todo: getting avaibles Composer list]
 queryForComoserVersion() {
 	curl https://getcomposer.org/download/ | grep 'composer.phar' | sed 's/<a href="\///g' | grep "download/" | sed 's/"//g' | sed 's/download\//📦<fe0f> https:\/\/getcomposer.org\/download\//g' | sed 's/ //g' | sed 's/(//g' > phpComposerList.txt
@@ -370,8 +375,6 @@ getLatestPHPVersion () {
 }
 
 
-
-
 # [Display all package that downloaded on the disk]
 listOfLocalPackage () {
 	printStartLine
@@ -381,7 +384,6 @@ listOfLocalPackage () {
 	packages=$(ls $packagesDir | grep .tar.xz)
 	echo $packages |  sed 's/ /\n/g' | sed 's/php/📦 php/g';
 }
-
 
 
 # [Display PHP-FPM UserName/GroupName]
@@ -417,7 +419,6 @@ installIt () {
     echo $getUserPassword | sudo -S apt-get install $tool -y >/dev/null
     echo " 🔥️ Done :). ${tool} install successfuly"
 }
-
 
 
 # [Checking/Installing requirement tools for Milk]
@@ -582,6 +583,12 @@ setPHPOnThePath () {
 }
 
 
+# [Is PHP Installed]
+checkingIsPhpInstalled () {
+    isPhpExist=$(ph1p --version 2>/dev/null | head -1 | awk '{print $1}')
+}
+
+
 # [Show all Options/Switches that use could use as input argument]
 help () {
     echo "${bold}🤓️ Help :${normal}"
@@ -652,6 +659,10 @@ printStartLine
 
 
 handelingInputCommand $getInputsArgs
+
+checkingIsPhpInstalled
+setDefaultPhpPhpFpmVersion --both
+
 # setDefaultPhpPhpFpmVersion
 # 
 # echo $currentPhpVersion
