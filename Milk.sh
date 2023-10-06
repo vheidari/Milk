@@ -38,6 +38,8 @@ bgEndColor="\033[0m"
 currentPhpVersion=
 currentPhpFpmVersion=
 isPhpExist=
+phpServerIpPort="127.0.0.1:1520"
+
 
 # [Proxy Variables]
 httpProxy=
@@ -52,6 +54,7 @@ lastVersion=
 currentDir=$(pwd)
 packagesDir="$currentDir/packages"
 phpInstallDir="$currentDir/versions/php"
+phpSrouceDir="$currentDir/src/php"
 packageName=$(echo $lastVersion | sed 's/https:\/\/.*\///g') 
 packageDirName=$(echo $packageName | sed 's/.tar.xz//g')
 packageNameAndVersion=${packageDirName}
@@ -379,6 +382,7 @@ getLatestPHPVersion () {
 
 
 # [Display all package that downloaded on the disk]
+# [@Callable: Direct Callable function]
 listOfLocalPackage () {
 	printStartLine
 	echo "📦 ${bold} List of local packages ${normal} :"
@@ -390,6 +394,7 @@ listOfLocalPackage () {
 
 
 # [Display PHP-FPM UserName/GroupName]
+# [@Callable: Direct Callable function]
 fpmUserNameAndGroupName () {
 	echo 🙋 "PHP-FPM Username  : " ${fpmUserName}
 	echo 🙋 "PHP-FPM Groupname : " ${fpmGroupName}
@@ -581,7 +586,7 @@ checkBuildingRequirement () {
 }
 
 
-# [Todo: Set Proxy for curl/wget]
+# [Set Proxy for curl/wget]
 # [@Callable: Dircet callable function]
 setProxy () {
     local getInputsArgs=$@
@@ -606,6 +611,34 @@ setProxy () {
     
     
 }
+
+
+# [Get Php info InBrowsers/Cli]
+# [@Callable: Direct callable function]
+getPhpInfo() {
+    local getInputsArgs=$1
+    
+    # [checking is php installed]
+    checkingIsPhpInstalled
+    
+    if [[ ${isPhpExist} == "PHP" ]]; then
+        case "$getInputsArgs" in
+            "--cli")
+                php -i
+            ;;
+            "--inbrowser")
+                cd "$phpSrouceDir/phpinfo"
+                php -S $phpServerIpPort
+            ;;
+            
+        esac
+        
+    fi
+    
+    
+}
+
+
 
 # [Todo: Setup appropriate php version on the path base on user request]
 setPHPOnThePath () {
@@ -689,8 +722,10 @@ printStartLine
 
 
 handelingInputCommand $getInputsArgs
+getPhpInfo --inbrowser
 
-setProxy --proxy http://127.0.0.1:2512 https://127.0.0.1:2513
+
+# setProxy --proxy http://127.0.0.1:2512 https://127.0.0.1:2513
 
 
 # 
