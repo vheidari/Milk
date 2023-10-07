@@ -39,8 +39,8 @@ bgEndColor="\033[0m"
 currentPhpVersion=
 currentPhpFpmVersion=
 isPhpExist=
-phpServerIpPort="127.0.0.1:1520"
-
+phpServerIp="127.0.0.1"
+phpServerPort="1520"
 
 # [Proxy Variables]
 httpProxy=
@@ -622,6 +622,15 @@ getPhpInfo() {
     # [checking is php installed]
     checkingIsPhpInstalled
     
+    
+    # [get Milk local server port]
+    getMilkLocalServerPort=$(cat "$currentDir/$milkConfigFile" |  jq ".MilkLocalServerPort" | sed 's/\"//g')
+    
+    # [checking getMilkLocalServerPort]
+    if [[ $getMilkLocalServerPort != "" ]]; then
+        phpServerPort=$getMilkLocalServerPort
+    fi
+    
     if [[ ${isPhpExist} == "PHP" ]]; then
         case "$getInputsArgs" in
             "--cli")
@@ -630,10 +639,10 @@ getPhpInfo() {
             "--inbrowser")
                 cd "$phpSrouceDir/phpinfo"
                 echo -e $bgBlueColor
-                echo "${bold}🔥️ To See your PHP Engine information. Please open this address [ http://$phpServerIpPort ] in your browsers. ${normal}"
+                echo "${bold}🔥️ To See your PHP Engine information. Please open this address [ http://$phpServerIp:$phpServerPort ] in your browsers. ${normal}"
                 echo -e $bgEndColor
                 echo -e "${redColor}${bold}‼️  [getPhpInfo]: To stop PHP information server, please use ${whiteColor}[CTRL+C]${endColor}${redColor}${bold} on your keyboard ${normal}${endColor}"
-                php -S $phpServerIpPort
+                php -S "$phpServerIp:$phpServerPort"
             ;;
             
         esac
@@ -645,7 +654,7 @@ getPhpInfo() {
 
 
 # [Set Milk local server port]
-# [@callable: Direct callable function]
+# [@Callable: Direct callable function]
 setLocalServerPort () {
     local getInputsArgs=$@
     local setOption="--setlocalport"
@@ -744,8 +753,8 @@ printStartLine
 
 
 handelingInputCommand $getInputsArgs
-# getPhpInfo --inbrowser
 setLocalServerPort "--setlocalport 2022"
+getPhpInfo --inbrowser
 
 
 # setProxy --proxy http://127.0.0.1:2512 https://127.0.0.1:2513
