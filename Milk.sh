@@ -628,6 +628,10 @@ getPhpInfo() {
             ;;
             "--inbrowser")
                 cd "$phpSrouceDir/phpinfo"
+                echo -e $bgBlueColor
+                echo "${bold}🔥️ To See your PHP Engine information. Please open this address [ http://$phpServerIpPort ] in your browsers. ${normal}"
+                echo -e $bgEndColor
+                echo -e "${redColor}${bold}‼️  To stop PHP information server, please use ${whiteColor}[CTRL+C]${endColor}${redColor}${bold} on your keyboard ${normal}${endColor}"
                 php -S $phpServerIpPort
             ;;
             
