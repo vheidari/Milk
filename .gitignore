@@ -7,3 +7,4 @@
 
 # Milk : git file ignore
 /MilkConfigTest.json
+/MilkCleanEnv.sh
