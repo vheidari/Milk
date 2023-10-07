@@ -14,6 +14,7 @@
 # [App variables]
 appName="🥛 Milk"
 appVersion="0.1.0"
+milkConfigFile="MilkConfig.json"
 
 # [Output stream variables]
 bold=$(tput bold)
@@ -290,7 +291,7 @@ displayBuildToolsInfo () {
     inputArg=$1
    
     # [checking for first time run]
-    firstRunCheck=$(cat ./MilkConfig.json | jq ".BuildingToolsRequirement.isAllBuildToolsInstall")
+    firstRunCheck=$(cat "$currentDir/$milkConfigFile" | jq ".BuildingToolsRequirement.isAllBuildToolsInstall")
    
    
    if [[ ${inputArg} == "--updateIt" || ${firstRunCheck} == "false" ]]; then
@@ -306,7 +307,7 @@ displayBuildToolsInfo () {
 	local getCmakeVersion=$(cmake --version | head -1 | awk '{print $3}')
 	
     # [updating MilkConfig.json with BuildingTools info ]
-	local updateMilkConfig=$(cat ./MilkConfig.json | jq ".BuildingToolsRequirement.Gpp[0].version =\"${getGppVersion}\"")
+	local updateMilkConfig=$(cat "$currentDir/$milkConfigFile" | jq ".BuildingToolsRequirement.Gpp[0].version =\"${getGppVersion}\"")
 	updateMilkConfig=$(echo $updateMilkConfig | jq ".BuildingToolsRequirement.Gpp[1].location =\"${getGpp}\"")
 	updateMilkConfig=$(echo $updateMilkConfig | jq ".BuildingToolsRequirement.Gcc[0].version =\"${getGccVersion}\"")
 	updateMilkConfig=$(echo $updateMilkConfig | jq ".BuildingToolsRequirement.Gcc[1].location =\"${getGcc}\"")
@@ -321,7 +322,7 @@ displayBuildToolsInfo () {
 	fi
 	
     # [update MilkConfig.json with new BuildingToolsChain info]
-	echo $updateMilkConfig > ./MilkConfig.json
+	echo $updateMilkConfig > "$currentDir/$milkConfigFile"
 	
 	echo -e "${bold}${greeColor}1). G++   :${endColor}${normal}"
 	echo -e "       -- g++ version     -> $getGppVersion"
@@ -631,7 +632,7 @@ getPhpInfo() {
                 echo -e $bgBlueColor
                 echo "${bold}🔥️ To See your PHP Engine information. Please open this address [ http://$phpServerIpPort ] in your browsers. ${normal}"
                 echo -e $bgEndColor
-                echo -e "${redColor}${bold}‼️  To stop PHP information server, please use ${whiteColor}[CTRL+C]${endColor}${redColor}${bold} on your keyboard ${normal}${endColor}"
+                echo -e "${redColor}${bold}‼️  [getPhpInfo]: To stop PHP information server, please use ${whiteColor}[CTRL+C]${endColor}${redColor}${bold} on your keyboard ${normal}${endColor}"
                 php -S $phpServerIpPort
             ;;
             
@@ -642,6 +643,23 @@ getPhpInfo() {
     
 }
 
+
+# [Set Milk local server port]
+# [@callable: Direct callable function]
+setLocalServerPort () {
+    local getInputsArgs=$@
+    local setOption="--setlocalport"
+    local getOption=$(echo $getInputsArgs | awk '{print $1}')
+    local getOptionValue=$(echo $getInputsArgs | awk '{print $2}')
+    if [[ ${getInputsArgs} != "" && ${getOption} != "" && ${getOption} == ${setOption} &&  ${getOptionValue} != "" ]]; then
+        local updateMilkConfig=$(cat "$currentDir/$milkConfigFile")
+        updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkLocalServerPort=\"${getOptionValue}\"")
+        echo $updateMilkConfig > "$currentDir/$milkConfigFile"
+    else 
+       echo -e "${redColor}${bold}‼️  [setLocalServerPort]: You should pass at least an input argument as [port number] in to this function. !!!${normal}${endColor}" 
+    fi
+    
+}
 
 
 # [Todo: Setup appropriate php version on the path base on user request]
@@ -726,7 +744,8 @@ printStartLine
 
 
 handelingInputCommand $getInputsArgs
-getPhpInfo --inbrowser
+# getPhpInfo --inbrowser
+setLocalServerPort "--setlocalport 2022"
 
 
 # setProxy --proxy http://127.0.0.1:2512 https://127.0.0.1:2513
