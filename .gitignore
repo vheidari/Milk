@@ -1,5 +1,5 @@
 # Milk : git directory ignore
-/_Testlab
+/_TestLab
 /Versions/php/php*
 /Packages/php*
 
