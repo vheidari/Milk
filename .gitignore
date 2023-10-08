@@ -1,10 +1,10 @@
 # Milk : git directory ignore
-/_Testlab
-/Versions/php/php*
-/Packages/php*
+/testlab
+/versions/php/php*
+/packages/php*
 
 
 
 # Milk : git file ignore
-/_MilkConfigTest.json
-/_MilkCleanEnv.sh
+/MilkConfigTest.json
+/MilkCleanEnv.sh

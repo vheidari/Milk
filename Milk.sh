@@ -56,9 +56,9 @@ fileExt="tar.xz"
 # ["https://www.php.net/distributions/php-7.4.27.tar.xz"]
 lastVersion=
 currentDir=$(pwd)
-packagesDir="$currentDir/Packages"
-phpInstallDir="$currentDir/Versions/php"
-phpSrouceDir="$currentDir/Src/php"
+packagesDir="$currentDir/packages"
+phpInstallDir="$currentDir/versions/php"
+phpSrouceDir="$currentDir/src/php"
 packageName=$(echo $lastVersion | sed 's/https:\/\/.*\///g') 
 packageDirName=$(echo $packageName | sed 's/.tar.xz//g')
 packageNameAndVersion=${packageDirName}
@@ -345,7 +345,7 @@ displayBuildToolsInfo () {
 }
 
 # [Todo: getting avaibles Composer list]
-queryForComoserVersion () {
+queryForComoserVersion() {
 	curl https://getcomposer.org/download/ | grep 'composer.phar' | sed 's/<a href="\///g' | grep "download/" | sed 's/"//g' | sed 's/download\//📦<fe0f> https:\/\/getcomposer.org\/download\//g' | sed 's/ //g' | sed 's/(//g' > phpComposerList.txt
 }
 
@@ -452,7 +452,7 @@ checkingRequirements () {
     isTrInstalled=$(dpkg-query -s coreutils 2>/dev/null | grep -iE installed | head -1)
     
     
-    local updateMilkConfig=$(cat "$currentDir/$milkConfigFile")
+    local updateMilkConfig=$(cat ./MilkConfig.json)
     
     # [install wget]
     if [[ ${isWgetInstalled} ]]; then
@@ -565,7 +565,7 @@ checkingRequirements () {
     fi
     
     # [updating MilkConfig.json with new information ]
-    echo $updateMilkConfig > "$currentDir/$milkConfigFile"
+    echo $updateMilkConfig > ./MilkConfig.json
     
 }
 
@@ -656,7 +656,7 @@ displayProxies () {
 
 # [Get Php info InBrowsers/Cli]
 # [@Callable: Direct callable function]
-getPhpInfo () {
+getPhpInfo() {
     local getInputsArgs=$1
     
     # [checking is php installed]
