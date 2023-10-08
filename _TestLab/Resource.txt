@@ -1,0 +1,84 @@
+sudo ./configure \
+ --enable-cli \
+ --enable-fpm \
+ --enable-intl \
+ --enable-mbstring \
+ --enable-opcache \
+ --enable-sockets \
+ --enable-soap \
+ --with-curl \
+ --with-freetype \
+ --with-fpm-user=www-data \
+ --with-fpm-group=www-data \
+ --with-jpeg \
+ --with-mysql-sock \
+ --with-mysqli \
+ --with-openssl \
+ --with-pdo-mysql \
+ --with-pgsql \
+ --with-xsl \
+ --with-zlib \
+ --with-config-file-path=/etc/php/8.2.9/cli \
+ --with-ffi \
+ --enable-calendar \
+ --enable-bcmath \
+ --enable-exif \
+ --enable-gd \
+ --enable-ftp \
+ --with-zip \
+ --enable-sysvmsg \
+ --enable-sysvsem \
+ --enable-sysvshm \
+ --enable-shmop \
+ --with-readline=/usr \
+ --with-gettext=/usr
+
+
+-------------------------------
+Get List of php version :
+curl https://www.php.net/releases/ | grep tar.xz | sed 's/<a href="/https:\/\/www.php.net/g' | sed 's/">.*//g' | sed 's/<li>//g' | sed 's/https:\/\//📦️ https:\/\//g'
+
+Get List of composer version :
+curl https://getcomposer.org/download/ | grep 'composer.phar' | sed 's/<a href="\///g' | grep "download/" | sed 's/"//g' | sed 's/download\//📦<fe0f> https:\/\/getcomposer.org\/download\//g' | sed 's/ //g' | sed 's/(//g' > phpComposerList.txt
+
+Get Php version :
+note : to install composer on machine we need to check best match for it. we chek php version and download best match for it
+php --version | grep -o -w '[0-9].[0-9].[0-9]'
+
+
+User this url to convert text to ascci logo
+https://patorjk.com/software/taag/#p=display&f=Binary&t=Brandname
+
+
+Check current package was compiled 
+ls php-version-dir/sapi/cli | grep php
+
+
+
+
+icons :
+🤓️
+
+🛠️
+✨
+🤖
+💣
+🤢
+😭
+📖
+💕
+💭
+💊
+👉
+🚨
+🍿
+🤔
+💖
+----------------------------------------------------------------------
+Using nc or netcat a http server and display Milk Configuration :
+	 echo -e "HTTP/1.1 200 OK\nContent-Type: application/json\n\n$(cat MilkConfig.json)" | nc -l 127.0.0.1 1234
+----------------------------------------------------------------------
+Adding Stylye to php -i 
+php -i | sed 's/^/---/g' | sed 's/^---$/****************************************************/g' | sed 's/__*//g' | sed 's/---/    /g'
+
+
