@@ -9,6 +9,9 @@
 
 # Todo : (refactoring sed part) through -e switch we could run multiple replacement replacement -e with multiple pipe 
 #   - link : https://unix.stackexchange.com/questions/268640/make-multiple-edits-with-a-single-call-to-sed
+# Todo : 1). set system proxy ($http_proxy)/($HTTP_PROXY) for wget/curl if them sets by user
+#        2). before download any requrest through wget/curl we should check for system proxy and local proxy through MilkConfig.json if them set should affect on the request
+# Todo : Implement Help function in a color full mode
 
 
 # [App variables]
@@ -611,6 +614,43 @@ setProxy () {
     fi
     
     
+}
+
+
+# [Read system proxy]
+setSystemProxy () {
+    # [get system http_proxy]
+    local isSystemProxiesSet=$http_proxy
+    
+    # [set httpProxy if $http_proxy was set]
+    if [[ ${isSystemProxiesSet} != ""  ]]; then
+        httpProxy=$http_proxy
+    fi
+
+}
+
+
+# [Todo : Is Proxies sets]
+isProxiesSets () {
+    if [[ ${httpProxy} != "" &&  ${httpsProxy} != ""  ]]; then
+        echo "isSet"
+    else 
+        echo "isntSet"
+    fi
+}
+
+# [Todo : Display Proxies to output stream]
+# [@Callable: Direct callable function]
+displayProxies () {
+    if [[ ${httpProxy}  != "" && ${httpsProxy} != "" || ${httpProxy}  != "ip:port" && ${httpsProxy} != "ip:port"  ]]; then
+        echo -e "Milk http proxy : " 
+        echo -e ""
+    else 
+        echo -e ${bgBlueColor}
+        echo "🤔 info [setProxy]: You doesn't set any proxies yet on the Milk. to set a [http/https] proxy please use [Milk --proxy ip:port] command ;)"
+        echo -e ${bgEndColor}
+        
+    fi
 }
 
 
