@@ -599,14 +599,14 @@ setProxy () {
         
         # [set proxy in config file]
         if [[ ${httpProxy} != "" && ${httpsProxy} != "" ]]; then
-            local updateMilkConfig=$(cat ./MilkConfig.json | jq ".proxyInfo.http=\"$httpProxy\"")
+            local updateMilkConfig=$(cat "$currentDir/$milkConfigFile" | jq ".proxyInfo.http=\"$httpProxy\"")
             updateMilkConfig=$(echo $updateMilkConfig | jq ".proxyInfo.https=\"$httpsProxy\"")
-            echo $updateMilkConfig > ./MilkConfig.json
+            echo $updateMilkConfig > "$currentDir/$milkConfigFile"
         fi
         
     else 
         echo -e ${bgRedColor}
-        echo "👀️ Error: Wrong input argument you passing : ( ${getOption} ) as input argument. you should use '[--proxy]' as input argument in [setProx] function !!"
+        echo "👀️ Error [setProxy]: Wrong input argument you passing : ( ${getOption} ) as input argument. you should use '[--proxy]' as input argument in [setProx] function !!"
         echo -e ${bgEndColor}
     fi
     
@@ -665,7 +665,9 @@ setLocalServerPort () {
         updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkLocalServerPort=\"${getOptionValue}\"")
         echo $updateMilkConfig > "$currentDir/$milkConfigFile"
     else 
-       echo -e "${redColor}${bold}‼️  [setLocalServerPort]: You should pass at least an input argument as [port number] in to this function. !!!${normal}${endColor}" 
+       echo -e ${bgRedColor}
+       echo -e "👀️Error [setLocalServerPort]: You should pass at least an input argument as [port number] in to this function. !!!${normal}${endColor}" 
+       echo -e ${bgEndColor}
     fi
     
 }
