@@ -20,7 +20,7 @@
 # [App variables]
 appName="🥛 Milk"
 appVersion="0.1.0"
-milkConfigFile="MilkConfig.json"
+milkConfigFile="_MilkConfigTest.json"
 
 # [Output stream variables]
 bold=$(tput bold)
