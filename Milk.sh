@@ -14,6 +14,8 @@
 # Todo : Implement Help function in a color full mode
 
 
+
+
 # [App variables]
 appName="🥛 Milk"
 appVersion="0.1.0"
