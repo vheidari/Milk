@@ -16,6 +16,7 @@
 
 
 
+
 # [App variables]
 appName="🥛 Milk"
 appVersion="0.1.0"
