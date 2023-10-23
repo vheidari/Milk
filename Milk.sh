@@ -7,9 +7,17 @@
 # Versuib : 0.1.0
 # ----------------------------------------------------------------------------------
 
-# [App Variables]
+# Todo : [--Force--] Implement Help function in a color full mode 
+# Todo : (refactoring sed part) through -e switch we could run multiple replacement replacement -e with multiple pipe 
+#   - link : https://unix.stackexchange.com/questions/268640/make-multiple-edits-with-a-single-call-to-sed
+# Todo : 1). set system proxy ($http_proxy)/($HTTP_PROXY) for wget/curl if them sets by user
+#        2). before download any requrest through wget/curl we should check for system proxy and local proxy through MilkConfig.json if them set should affect on the request
+
+
+# [App variables]
 appName="🥛 Milk"
 appVersion="0.1.0"
+milkConfigFile="_MilkConfigTest.json"
 
 # [Output stream variables]
 bold=$(tput bold)
@@ -30,7 +38,16 @@ bgYellowColor="\033[43m"
 bgWhiteColor="\033[47m"
 bgEndColor="\033[0m"
 
+# [PHP/PHPFpm Version variables]
+currentPhpVersion=
+currentPhpFpmVersion=
+isPhpExist=
+phpServerIp="127.0.0.1"
+phpServerPort="1520"
 
+# [Proxy Variables]
+httpProxy=
+httpsProxy=
 
 # [PHP Packages Variables]
 baseUrl="https://www.php.net"
@@ -39,8 +56,9 @@ fileExt="tar.xz"
 # ["https://www.php.net/distributions/php-7.4.27.tar.xz"]
 lastVersion=
 currentDir=$(pwd)
-packagesDir="$currentDir/packages"
-phpInstallDir="$currentDir/versions/php"
+packagesDir="$currentDir/Packages"
+phpInstallDir="$currentDir/Versions/php"
+phpSrouceDir="$currentDir/Src/php"
 packageName=$(echo $lastVersion | sed 's/https:\/\/.*\///g') 
 packageDirName=$(echo $packageName | sed 's/.tar.xz//g')
 packageNameAndVersion=${packageDirName}
@@ -92,6 +110,26 @@ setUserPassword () {
     fi
 }
 
+# [Create a download url through input argument]
+createDownloadUrl () {
+    local getInputsArgs=$1
+    local patternOne="^php-[0-9]+\.[0-9]+\.[0-9]+\.tar\.xz$"
+    local patternTwo="^php-[0-9]+\.[0-9]+\.[0-9]+$"
+    local downloadUrl=
+        
+    if [[ $getInputsArgs != "" && $getInputsArgs =~ $patternOne ]]; then
+        downloadUrl="${baseDownloadUrl}/${getInputsArgs}"
+        echo $downloadUrl
+    elif [[ $getInputsArgs =~ $patternTwo ]]; then
+        downloadUrl="${baseDownloadUrl}/${getInputsArgs}.$fileExt"
+        echo $downloadUrl
+    else
+        echo -e ${bgRedColor}
+             echo "Unfortuanly this \"$getInputsArgs\" package name isn't valid!. please use Milk with [--help] switch. "
+        echo -e ${bgEndColor}
+    fi
+}
+
 
 # [Todo: Return default PHP version]
 getDefaultPHPVersion () {
@@ -109,7 +147,6 @@ createDownloadUrl () {
     fi
     
 }
-
 
 
 # [Downloading the latest version of PHP]
@@ -230,18 +267,47 @@ startBuildProject () {
 }
 
 
-# [Get Current PHP installed on the system]
-getPhpVersion () {
-	identifyPHP=$( which php )
-	if [ -f "$identifyPHP" ]; then
-		# php --version | head -1 | awk '{print $2}' 
-		currentPhpVersion=$( /usr/local/bin/php --version | grep -o -w '[0-9].[0-9].[0-9]' | head -1 ) 
+# [Set PHP/PHPFpm version variables if them are exist ]
+setDefaultPhpPhpFpmVersion () {
+    # [get input arguments]
+    getInputsArgs=$1
+    
+    # [checking php exist on this machine]
+    checkingIsPhpInstalled
+    
+    # [set php version if its installed on the system]
+    if [[ ${isPhpExist} == "PHP" ]]; then
+    
+        case "$getInputsArgs" in  
+            "--phpVersion")
+                currentPhpVersion=$(php -v 2>/dev/null | head -1 | awk '{print $2}')
+            ;;
+            "--phpFpmVerison")
+                currentPhpFpmVersion=$(php-fpm --version 2>/dev/null | head -1 | awk '{print $2}')
+            ;;
+            
+            "--both")
+                currentPhpVersion=$(php -v 2>/dev/null | head -1 | awk '{print $2}')
+                currentPhpFpmVersion=$(php-fpm --version 2>/dev/null | head -1 | awk '{print $2}')
+            ;;
+            
+        esac
+        
+        if [[ $getInputsArgs != "" && ${currentPhpVersion} == "" && ${currentPhpFpmVersion} == "" ]]; then
+            echo -e ${bgRedColor}
+            echo "👀️ Error: Milk cannot find any [PHP] or [PHP Fpm] engines on your system or you might use a wrong input : ${getInputsArgs} argument !!"
+            echo -e ${bgEndColor}
+        fi
+        
+        
+    else 
+            echo -e ${bgRedColor}
+            echo "👀️ Error: Milk cannot find any [PHP] or [PHP Fpm] engines on your system !!"
+            echo -e ${bgEndColor}
+    fi
+        
 
-	else 
-		echo "couldn't find any php on your machine";
-	fi
-	echo $currentPhpVersion
-	echo $identifyPHP
+
 }
 
 # [Display BuildingToolsChain]
@@ -251,8 +317,8 @@ displayBuildToolsInfo () {
     inputArg=$1
    
     # [checking for first time run]
-    firstRunCheck=$(cat ./MilkConfig.json | jq ".BuildingToolsRequirement.isAllBuildToolsInstall")
-   
+
+    firstRunCheck=$(cat "$currentDir/$milkConfigFile" | jq ".BuildingToolsRequirement.isAllBuildToolsInstall")   
    
    if [[ ${inputArg} == "--updateIt" || ${firstRunCheck} == "false" ]]; then
     
@@ -267,7 +333,9 @@ displayBuildToolsInfo () {
 	local getCmakeVersion=$(cmake --version | head -1 | awk '{print $3}')
 	
     # [updating MilkConfig.json with BuildingTools info ]
-	local updateMilkConfig=$(cat ./MilkConfig.json | jq ".BuildingToolsRequirement.Gpp[0].version =\"${getGppVersion}\"")
+
+	local updateMilkConfig=$(cat "$currentDir/$milkConfigFile" | jq ".BuildingToolsRequirement.Gpp[0].version =\"${getGppVersion}\"")
+
 	updateMilkConfig=$(echo $updateMilkConfig | jq ".BuildingToolsRequirement.Gpp[1].location =\"${getGpp}\"")
 	updateMilkConfig=$(echo $updateMilkConfig | jq ".BuildingToolsRequirement.Gcc[0].version =\"${getGccVersion}\"")
 	updateMilkConfig=$(echo $updateMilkConfig | jq ".BuildingToolsRequirement.Gcc[1].location =\"${getGcc}\"")
@@ -282,7 +350,9 @@ displayBuildToolsInfo () {
 	fi
 	
     # [update MilkConfig.json with new BuildingToolsChain info]
-	echo $updateMilkConfig > ./MilkConfig.json
+
+	echo $updateMilkConfig > "$currentDir/$milkConfigFile"
+
 	
 	echo -e "${bold}${greeColor}1). G++   :${endColor}${normal}"
 	echo -e "       -- g++ version     -> $getGppVersion"
@@ -302,9 +372,9 @@ displayBuildToolsInfo () {
 }
 
 
-
 # [Todo: getting avaibles Composer list]
-queryForComoserVersion() {
+queryForComoserVersion () {
+
 	curl https://getcomposer.org/download/ | grep 'composer.phar' | sed 's/<a href="\///g' | grep "download/" | sed 's/"//g' | sed 's/download\//📦<fe0f> https:\/\/getcomposer.org\/download\//g' | sed 's/ //g' | sed 's/(//g' > phpComposerList.txt
 }
 
@@ -345,8 +415,11 @@ getLatestPHPVersion () {
 
 
 
-
 # [Display all package that downloaded on the disk]
+# [@Callable: Direct Callable function]
+
+
+
 listOfLocalPackage () {
 	printStartLine
 	echo "📦 ${bold} List of local packages ${normal} :"
@@ -359,6 +432,8 @@ listOfLocalPackage () {
 
 
 # [Display PHP-FPM UserName/GroupName]
+# [@Callable: Direct Callable function]
+
 fpmUserNameAndGroupName () {
 	echo 🙋 "PHP-FPM Username  : " ${fpmUserName}
 	echo 🙋 "PHP-FPM Groupname : " ${fpmGroupName}
@@ -413,7 +488,9 @@ checkingRequirements () {
     isTrInstalled=$(dpkg-query -s coreutils 2>/dev/null | grep -iE installed | head -1)
     
     
-    local updateMilkConfig=$(cat ./MilkConfig.json)
+
+    local updateMilkConfig=$(cat "$currentDir/$milkConfigFile")
+
     
     # [install wget]
     if [[ ${isWgetInstalled} ]]; then
@@ -526,7 +603,8 @@ checkingRequirements () {
     fi
     
     # [updating MilkConfig.json with new information ]
-    echo $updateMilkConfig > ./MilkConfig.json
+    echo $updateMilkConfig > "$currentDir/$milkConfigFile"
+
     
 }
 
@@ -550,19 +628,149 @@ checkBuildingRequirement () {
     
 }
 
-# [Get Current Php version that set on system ]
-setProperPHPVersion () {
+
+# [Set Proxy for curl/wget]
+# [@Callable: Dircet callable function]
+setProxy () {
+    local getInputsArgs=$@
+    local getOption=$(echo $getInputsArgs | awk '{print $1}')
+    
+    if [[ $getOption == "--proxy" ]]; then
+        httpProxy=$(echo $getInputsArgs | awk '{print $2}')
+        httpsProxy=$(echo $getInputsArgs | awk '{print $3}')
+        
+        # [set proxy in config file]
+        if [[ ${httpProxy} != "" && ${httpsProxy} != "" ]]; then
+            local updateMilkConfig=$(cat "$currentDir/$milkConfigFile" | jq ".proxyInfo.http=\"$httpProxy\"")
+            updateMilkConfig=$(echo $updateMilkConfig | jq ".proxyInfo.https=\"$httpsProxy\"")
+            echo $updateMilkConfig > "$currentDir/$milkConfigFile"
+        fi
+        
+    else 
+        echo -e ${bgRedColor}
+        echo "👀️ Error [setProxy]: Wrong input argument you passing : ( ${getOption} ) as input argument. you should use '[--proxy]' as input argument in [setProx] function !!"
+        echo -e ${bgEndColor}
+    fi
+    
+    
+}
+
+
+# [Read system proxy]
+setSystemProxy () {
+    # [get system http_proxy]
+    local isSystemProxiesSet=$http_proxy
+    
+    # [set httpProxy if $http_proxy was set]
+    if [[ ${isSystemProxiesSet} != ""  ]]; then
+        httpProxy=$http_proxy
+    fi
+
+}
+
+
+# [Todo : Is Proxies sets]
+isProxiesSets () {
+    if [[ ${httpProxy} != "" &&  ${httpsProxy} != ""  ]]; then
+        echo "isSet"
+    else 
+        echo "isntSet"
+    fi
+}
+
+# [Todo : Display Proxies to output stream]
+# [@Callable: Direct callable function]
+displayProxies () {
+    if [[ ${httpProxy}  != "" && ${httpsProxy} != "" || ${httpProxy}  != "ip:port" && ${httpsProxy} != "ip:port"  ]]; then
+        echo -e "Milk http proxy : " 
+        echo -e ""
+    else 
+        echo -e ${bgBlueColor}
+        echo "🤔 info [setProxy]: You doesn't set any proxies yet on the Milk. to set a [http/https] proxy please use [Milk --proxy ip:port] command ;)"
+        echo -e ${bgEndColor}
+        
+    fi
+}
+
+
+# [Get Php info InBrowsers/Cli]
+# [@Callable: Direct callable function]
+getPhpInfo () {
+    local getInputsArgs=$1
+    
+    # [checking is php installed]
+    checkingIsPhpInstalled
+    
+    
+    # [get Milk local server port]
+    getMilkLocalServerPort=$(cat "$currentDir/$milkConfigFile" |  jq ".MilkLocalServerPort" | sed 's/\"//g')
+    
+    # [checking getMilkLocalServerPort]
+    if [[ $getMilkLocalServerPort != "" ]]; then
+        phpServerPort=$getMilkLocalServerPort
+    fi
+    
+    if [[ ${isPhpExist} == "PHP" ]]; then
+        case "$getInputsArgs" in
+            "--cli")
+                php -i
+            ;;
+            "--inbrowser")
+                cd "$phpSrouceDir/phpinfo"
+                echo -e $bgBlueColor
+                echo "${bold}🔥️ To See your PHP Engine information. Please open this address [ http://$phpServerIp:$phpServerPort ] in your browsers. ${normal}"
+                echo -e $bgEndColor
+                echo -e "${redColor}${bold}‼️  [getPhpInfo]: To stop PHP information server, please use ${whiteColor}[CTRL+C]${endColor}${redColor}${bold} on your keyboard ${normal}${endColor}"
+                php -S "$phpServerIp:$phpServerPort"
+            ;;
+            
+        esac
+        
+    fi
+    
+    
+}
+
+
+# [Set Milk local server port]
+# [@Callable: Direct callable function]
+setLocalServerPort () {
+    local getInputsArgs=$@
+    local setOption="--setlocalport"
+    local getOption=$(echo $getInputsArgs | awk '{print $1}')
+    local getOptionValue=$(echo $getInputsArgs | awk '{print $2}')
+    if [[ ${getInputsArgs} != "" && ${getOption} != "" && ${getOption} == ${setOption} &&  ${getOptionValue} != "" ]]; then
+        local updateMilkConfig=$(cat "$currentDir/$milkConfigFile")
+        updateMilkConfig=$(echo $updateMilkConfig | jq ".MilkLocalServerPort=\"${getOptionValue}\"")
+        echo $updateMilkConfig > "$currentDir/$milkConfigFile"
+    else 
+       echo -e ${bgRedColor}
+       echo -e "👀️Error [setLocalServerPort]: You should pass at least an input argument as [port number] in to this function. !!!${normal}${endColor}" 
+       echo -e ${bgEndColor}
+    fi
+    
+}
+
+
+# [Todo: Setup appropriate php version on the path base on user request]
+setPHPOnThePath () {
     echo ""
 }
 
 
-# [Show all Options/Switches that use could use as input argument]
+# [Is PHP Installed]
+checkingIsPhpInstalled () {
+    isPhpExist=$(php --version 2>/dev/null | head -1 | awk '{print $1}')
+}
+
+
+# [Todo: Show all Options/Switches that use could use as input argument]
 help () {
     echo "${bold}🤓️ Help :${normal}"
     echo "this is help functions"
 }
 
-# [Handeling input Options/Switches]
+# [Todo: Handeling input Options/Switches]
 handelingInputCommand () {
 
     local inputArgs=$@
@@ -591,12 +799,14 @@ handelingInputCommand () {
 
 
 
-# [Managing phpfpm service start/stop/restart/status]
+
+# [Todo : Managing phpfpm service start/stop/restart/status]
 managePHPFpmEngineService () {
      echo ""
 }
 
-# [Todo : Running/Configuring Milk through browsers - dep:netcat http server]
+
+# [Todo : Running/Configuring Milk through browsers]
 managerTroughtUI () {
     echo ""
 }
@@ -626,10 +836,34 @@ printStartLine
 
 
 handelingInputCommand $getInputsArgs
+
+setLocalServerPort "--setlocalport 2022"
+getPhpInfo --inbrowser
+
+
+# setProxy --proxy http://127.0.0.1:2512 https://127.0.0.1:2513
+
+
+# 
+# checkingIsPhpInstalled
+# setDefaultPhpPhpFpmVersion --both
+
+
+# setDefaultPhpPhpFpmVersion
+# 
+# echo $isPhpExist
+# echo $currentPhpVersion
+# echo $currentPhpFpmVersion
+
+# createDownloadUrl "php-7.4.27.tar.xz"
+# createDownloadUrl "php-7.4.7"
+
 # queryForPHPPackages --get-last-version
-getLatestPHPVersion --display-last-version
+# queryForPHPPackages
+# getLatestPHPVersion --display-last-version
 # forceUpdateMilkConfig
 # listOfLocalPackage
+
 
 
 # checkingRequirements

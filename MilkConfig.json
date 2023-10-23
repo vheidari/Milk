@@ -28,6 +28,7 @@
         "tr": [{"version": ""}, {"location": ""}],
         "isAllBuildToolsInstall" : false
     },
+    "MilkLocalServerPort": "1520",
     "CountRun" : {
         "IsItFirstRun" : true,
         "Counter" : 0
