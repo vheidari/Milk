@@ -7,14 +7,11 @@
 # Versuib : 0.1.0
 # ----------------------------------------------------------------------------------
 
+# Todo : [--Force--] Implement Help function in a color full mode 
 # Todo : (refactoring sed part) through -e switch we could run multiple replacement replacement -e with multiple pipe 
 #   - link : https://unix.stackexchange.com/questions/268640/make-multiple-edits-with-a-single-call-to-sed
 # Todo : 1). set system proxy ($http_proxy)/($HTTP_PROXY) for wget/curl if them sets by user
 #        2). before download any requrest through wget/curl we should check for system proxy and local proxy through MilkConfig.json if them set should affect on the request
-# Todo : Implement Help function in a color full mode
-
-
-
 
 
 # [App variables]
@@ -768,7 +765,7 @@ managePHPFpmEngineService () {
      echo ""
 }
 
-# [Todo : Running/Configuring Milk through browsers - dep:netcat http server]
+# [Todo : Running/Configuring Milk through browsers]
 managerTroughtUI () {
     echo ""
 }
