@@ -85,6 +85,7 @@ printEndLine () {
 	echo "==========================================================================================="
 }
 
+
 # [Get user system pa$$word]
 setUserPassword () {
     echo -e "${redColor}‼️  Note 1: To Installing${endColor}${bold} ${appName} ${normal}${redColor} and its requirement tools ${endColor}${bold} ${appName} ${normal}${redColor}need your system password.${endColor}"
@@ -128,6 +129,25 @@ createDownloadUrl () {
         echo -e ${bgEndColor}
     fi
 }
+
+
+# [Todo: Return default PHP version]
+getDefaultPHPVersion () {
+    echo ""
+}
+
+
+# [Todo : this function should get a PHP name/version as input argument and create a download url]
+createDownloadUrl () {
+    local getInputsArgs=$1
+    local downloadUrl=
+    if [[  $getInputsArgs != "" ]]; then
+        downloadUrl=$("${baseDownloadUrl}\/${getInputsArgs}")
+        echo $downloadUrl
+    fi
+    
+}
+
 
 # [Downloading the latest version of PHP]
 downloadLastVersion () {
@@ -246,6 +266,7 @@ startBuildProject () {
 	echo " 🔥️ Done :), $packageNameAndVersion successfully compiled!!!"
 }
 
+
 # [Set PHP/PHPFpm version variables if them are exist ]
 setDefaultPhpPhpFpmVersion () {
     # [get input arguments]
@@ -285,6 +306,8 @@ setDefaultPhpPhpFpmVersion () {
             echo -e ${bgEndColor}
     fi
         
+
+
 }
 
 # [Display BuildingToolsChain]
@@ -294,8 +317,8 @@ displayBuildToolsInfo () {
     inputArg=$1
    
     # [checking for first time run]
-    firstRunCheck=$(cat "$currentDir/$milkConfigFile" | jq ".BuildingToolsRequirement.isAllBuildToolsInstall")
-   
+
+    firstRunCheck=$(cat "$currentDir/$milkConfigFile" | jq ".BuildingToolsRequirement.isAllBuildToolsInstall")   
    
    if [[ ${inputArg} == "--updateIt" || ${firstRunCheck} == "false" ]]; then
     
@@ -310,7 +333,9 @@ displayBuildToolsInfo () {
 	local getCmakeVersion=$(cmake --version | head -1 | awk '{print $3}')
 	
     # [updating MilkConfig.json with BuildingTools info ]
+
 	local updateMilkConfig=$(cat "$currentDir/$milkConfigFile" | jq ".BuildingToolsRequirement.Gpp[0].version =\"${getGppVersion}\"")
+
 	updateMilkConfig=$(echo $updateMilkConfig | jq ".BuildingToolsRequirement.Gpp[1].location =\"${getGpp}\"")
 	updateMilkConfig=$(echo $updateMilkConfig | jq ".BuildingToolsRequirement.Gcc[0].version =\"${getGccVersion}\"")
 	updateMilkConfig=$(echo $updateMilkConfig | jq ".BuildingToolsRequirement.Gcc[1].location =\"${getGcc}\"")
@@ -325,7 +350,9 @@ displayBuildToolsInfo () {
 	fi
 	
     # [update MilkConfig.json with new BuildingToolsChain info]
+
 	echo $updateMilkConfig > "$currentDir/$milkConfigFile"
+
 	
 	echo -e "${bold}${greeColor}1). G++   :${endColor}${normal}"
 	echo -e "       -- g++ version     -> $getGppVersion"
@@ -344,8 +371,10 @@ displayBuildToolsInfo () {
 
 }
 
+
 # [Todo: getting avaibles Composer list]
 queryForComoserVersion () {
+
 	curl https://getcomposer.org/download/ | grep 'composer.phar' | sed 's/<a href="\///g' | grep "download/" | sed 's/"//g' | sed 's/download\//📦<fe0f> https:\/\/getcomposer.org\/download\//g' | sed 's/ //g' | sed 's/(//g' > phpComposerList.txt
 }
 
@@ -385,8 +414,12 @@ getLatestPHPVersion () {
 }
 
 
+
 # [Display all package that downloaded on the disk]
 # [@Callable: Direct Callable function]
+
+
+
 listOfLocalPackage () {
 	printStartLine
 	echo "📦 ${bold} List of local packages ${normal} :"
@@ -397,8 +430,10 @@ listOfLocalPackage () {
 }
 
 
+
 # [Display PHP-FPM UserName/GroupName]
 # [@Callable: Direct Callable function]
+
 fpmUserNameAndGroupName () {
 	echo 🙋 "PHP-FPM Username  : " ${fpmUserName}
 	echo 🙋 "PHP-FPM Groupname : " ${fpmGroupName}
@@ -433,6 +468,7 @@ installIt () {
 }
 
 
+
 # [Checking/Installing requirement tools for Milk]
 checkingRequirements () {
     
@@ -452,7 +488,9 @@ checkingRequirements () {
     isTrInstalled=$(dpkg-query -s coreutils 2>/dev/null | grep -iE installed | head -1)
     
     
+
     local updateMilkConfig=$(cat "$currentDir/$milkConfigFile")
+
     
     # [install wget]
     if [[ ${isWgetInstalled} ]]; then
@@ -566,6 +604,7 @@ checkingRequirements () {
     
     # [updating MilkConfig.json with new information ]
     echo $updateMilkConfig > "$currentDir/$milkConfigFile"
+
     
 }
 
@@ -760,10 +799,12 @@ handelingInputCommand () {
 
 
 
+
 # [Todo : Managing phpfpm service start/stop/restart/status]
 managePHPFpmEngineService () {
      echo ""
 }
+
 
 # [Todo : Running/Configuring Milk through browsers]
 managerTroughtUI () {
@@ -795,6 +836,7 @@ printStartLine
 
 
 handelingInputCommand $getInputsArgs
+
 setLocalServerPort "--setlocalport 2022"
 getPhpInfo --inbrowser
 
@@ -821,6 +863,7 @@ getPhpInfo --inbrowser
 # getLatestPHPVersion --display-last-version
 # forceUpdateMilkConfig
 # listOfLocalPackage
+
 
 
 # checkingRequirements
